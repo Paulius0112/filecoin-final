@@ -1,0 +1,16 @@
+
+- name: deploy cadvisor
+  docker_container:
+    name: "cadvisor"
+    image: "google/cadvisor"
+    network_mode: "syntropy_network"
+    command: --port=8082
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.56.1.3"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    detach: yes

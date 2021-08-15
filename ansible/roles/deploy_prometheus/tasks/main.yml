@@ -1,0 +1,38 @@
+- name: create Docker network
+  docker_network:
+    name: syntropy_network
+    ipam_config:
+      - subnet: 10.56.1.0/24
+  ignore_errors: true
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+
+- name: create Prometheus directory
+  file:
+    name: /home/prometheus/
+    state: directory
+
+- name: copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: /home/prometheus/prometheus.yml
+
+- name: deploy Prometheus container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus:v2.1.0
+    hostname: prometheus
+    purge_networks: yes
+    volumes:
+      - /home/prometheus/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    network_mode: "syntropy_network"
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.56.1.2"

@@ -1,0 +1,63 @@
+
+---
+- connections:
+    filecoin_node:
+      connect_to:
+        monitoring_node:
+          services:
+            - prometheus
+            - grafana
+            - cadvisor
+          state: present
+          type: endpoint
+        localhost:
+          services: []
+          state: present
+          type: endpoint
+      services:
+        - powergate
+        - ipfs
+        - lotus
+      state: present
+      type: endpoint
+    monitoring_node:
+      connect_to:
+        filecoin_node:
+          services:
+            - powergate
+            - ipfs
+            - lotus
+          state: present
+          type: endpoint
+        localhost:
+          services: []
+          state: present
+          type: endpoint
+      services:
+        - grafana
+        - cadvisor
+        - prometheus
+      state: present
+      type: endpoint
+    localhost:
+      connect_to:
+        filecoin_node:
+          services:
+            - powergate
+            - ipfs
+            - lotus
+          state: present
+          type: endpoint
+        monitoring_node:
+          services:
+            - prometheus
+            - grafana
+            - cadvisor
+          state: present
+          type: endpoint
+      services: []
+      state: present
+      type: endpoint
+  name: Syntropy Stack Account Network
+  state: present
+  topology: P2M

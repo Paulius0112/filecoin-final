@@ -1,0 +1,90 @@
+- name: General setup and install docker
+  hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - general
+    - docker
+
+- name: add user to Docker group
+  hosts: monitoring
+  become: yes
+  become_user: root
+  tasks:
+  - name: add monitoring user to Docker group
+    user:
+      name: ethereum
+      groups: docker
+      append: true
+    become: yes
+    become_user: root
+
+- name: Deploy Syntropy agent on localhost
+  hosts: 127.0.0.1
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY }}"
+    SYNTROPY_AGENT_NAME: "localhost"   
+    SYNTROPY_PROVIDER: ""
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy Syntropy agent on filecoin node
+  hosts: node
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY }}"
+    SYNTROPY_AGENT_NAME: "filecoin_node"   
+    SYNTROPY_PROVIDER: "16"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy Syntropy agent on monitoring node
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles: 
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY_ }}"
+    SYNTROPY_AGENT_NAME: "monitoring_node"   
+    SYNTROPY_PROVIDER: "3"
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy filecoin node
+  hosts: node
+  become: yes
+  become_user: root
+  roles:
+    - deploy_ipfs
+    - deploy_node
+    - deploy_powergate
+  vars_files:
+    - vars/main.yml
+
+- name: Deploy monitoring
+  hosts: monitoring
+  become: yes
+  become_user: root
+  roles:
+    - deploy_prometheus
+    - deploy_cadvisor
+    - deploy_grafana
+  vars_files:
+    - vars/main.yml
+    
+#- name: create Syntropy Ethereum network
+#  hosts: localhost
+#  roles:
+#    - syntropy_filecoin_network
+#  vars:
+#    SYNTROPY_CONTROLLER_URL: "{{ SYNTROPY_CONTROLLER_URL }}"
+#    SYNTROPY_USERNAME: "{{ SYNTROPY_USERNAME }}"
+#    SYNTROPY_PASSWORD: "{{ SYNTROPY_PASSWORD }}"
+#  vars_files:
+#    - vars/main.yml

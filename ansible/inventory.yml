@@ -1,0 +1,5 @@
+[monitoring]
+172.104.253.70 ansible_user=root
+
+[node]
+172.104.253.63 ansible_user=root

@@ -1,0 +1,13 @@
+- name: Configure host node
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  roles:
+    - general
+    - docker
+    - deploy_agent
+  vars:
+    SYNTROPY_API_KEY: "{{ SYNTROPY_API_KEY }}"
+    SYNTROPY_AGENT_NAME: "local"  
+  vars_files:
+    - vars/main.yml

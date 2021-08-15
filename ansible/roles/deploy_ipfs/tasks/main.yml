@@ -1,0 +1,25 @@
+- name: create Docker network
+  docker_network:
+    name: syntropy_network
+    ipam_config:
+      - subnet: 10.52.2.0/24
+  ignore_errors: true
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+
+- name: deploy ipfs
+  docker_container:
+    name: "ipfs"
+    image: "ipfs/go-ipfs:v0.7.0"
+    network_mode: "syntropy_network"
+    volumes:
+      - powergate-ipfs:/data/ipfs
+    ports:
+      - 5001:5001
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.52.2.5"
+    command: daemon --migrate=true --enable-pubsub-experiment
+    detach: yes

@@ -1,0 +1,46 @@
+- name: create Grafana main config directory
+  file:
+    path: "/home/grafana/"
+    state: directory
+
+- name: create Grafana config directories
+  file:
+    path: "/home/grafana/{{item}}"
+    state: directory
+  with_items:
+    - "dashboards"
+    - "datasources"
+
+- name: Copy Grafana datasource
+  copy:
+    src: 'datasources/datasource.yml'
+    dest: /home/grafana/datasources/datasource.yml
+
+- name: Copy Grafana providers
+  copy:
+    src: 'dashboards/dashboard.yml'
+    dest: /home/grafana/dashboards/dashboard.yml
+
+- name: Copy Grafana dashboard
+  copy:
+    src: 'dashboards/TextileFC.json'
+    dest: /home/grafana/dashboards/TextileFC.json
+
+- name: run Grafana container
+  docker_container:
+    name: grafana
+    image: bitnami/grafana:latest
+    state: started
+    purge_networks: yes
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ GRAFANA_USERNAME }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ GRAFANA_PASSWORD }}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - "/home/grafana/:/etc/grafana/provisioning/"
+    network_mode: "syntropy_network"
+   # env_file:
+   #   - home/grafana/config.monitoring
+    networks:
+      - name: syntropy_network
+        ipv4_address: "10.56.1.4"

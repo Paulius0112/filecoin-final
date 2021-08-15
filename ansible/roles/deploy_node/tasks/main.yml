@@ -1,0 +1,32 @@
+- name: Create a volume
+  community.docker.docker_volume:
+    name: powergate-powd
+ 
+- name: Create a volume
+  community.docker.docker_volume:
+    name: powergate-ipfs
+  
+- name: Create a volume
+  community.docker.docker_volume:
+    name: powergate-lotus
+
+- name: launch filecoin node
+  docker_container:
+    name: "lotus"
+    image: "textile/lotus:v1.10.0"
+    network_mode: "syntropy_network"
+    volumes:
+      - powergate-lotus:/data
+    command: ["lotus", "daemon", "--import-snapshot", "https://fil-chain-snapshots-fallback.s3.amazonaws.com/mainnet/minimal_finality_stateroots_latest.car"]
+    networks: 
+      - name: "syntropy_network"
+        ipv4_address: "10.52.2.6"
+    env:
+      LOTUS_API_LISTENADDRESS: "/ip4/0.0.0.0/tcp/1234/http"
+      LOTUS_CLIENT_USEIPFS: "true"
+      LOTUS_CLIENT_IPFSUSEFORRETRIEVAL: "true"
+      LOTUS_CLIENT_IPFSMADDR: "/dns4/ipfs/tcp/5001"
+    ports:
+      - "1234:1234"
+      - "5678:5678"
+    detach: yes
